@@ -4,7 +4,7 @@
  * @brief This file contains script processing functions
  *
  * @author Thomas Fischl
- * @copyright (c) 2013 Thomas Fischl
+ * @copyright (c) 2013-2014 Thomas Fischl
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,6 +100,7 @@ uint8_t script_run() {
             }
                 break;
             case SCRIPT_CMD_FLASH:
+            case SCRIPT_CMD_EEPROM:
             {
 
                 uint32_t address = (uint32_t) flash_readbyte(scriptdata_p++) << 24;
@@ -115,8 +116,13 @@ uint8_t script_run() {
                 uint16_t pagesize = (uint16_t) flash_readbyte(scriptdata_p++) << 8;
                 pagesize |= (uint16_t) flash_readbyte(scriptdata_p++);
 
-                isp_flash(scriptdata_p, address, length, pagesize);
-                success = isp_verify(scriptdata_p, address, length);
+                if (cmd == SCRIPT_CMD_FLASH) {
+                    isp_writeFlash(scriptdata_p, address, length, pagesize);
+                    success = isp_verifyFlash(scriptdata_p, address, length);
+                } else {
+                    isp_writeEEPROM(scriptdata_p, address, length, pagesize);
+                    success = isp_verifyEEPROM(scriptdata_p, address, length);
+                }
 
                 scriptdata_p += length;
             }

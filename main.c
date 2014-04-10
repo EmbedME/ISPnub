@@ -20,6 +20,8 @@
  *   - Initial release
  * - v1.1 (2013-10-06)
  *   - Code cleanup and documentation
+ * - v1.2 (2014-04-08)
+ *   - Added EEPROM programming
  *
  */
 
@@ -30,7 +32,7 @@
  *        the ISPnub firmware project
  *
  * @author Thomas Fischl
- * @copyright (c) 2013 Thomas Fischl
+ * @copyright (c) 2013-2014 Thomas Fischl
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

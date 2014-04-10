@@ -4,7 +4,7 @@
  * @brief This file contains ISP programming functions
  *
  * @author Thomas Fischl
- * @copyright (c) 2013 Thomas Fischl
+ * @copyright (c) 2013-2014 Thomas Fischl
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,7 +127,7 @@ void isp_transmit(uint8_t * data, uint8_t len) {
  * @param length Length of data block
  * @param pagesize Size of target flash page
  */
-void isp_flash(uint32_t mempointer, uint32_t address, uint32_t length, uint16_t pagesize) {
+void isp_writeFlash(uint32_t mempointer, uint32_t address, uint32_t length, uint16_t pagesize) {
 
     uint8_t doflush = 0;
     uint8_t data[4];
@@ -137,7 +137,7 @@ void isp_flash(uint32_t mempointer, uint32_t address, uint32_t length, uint16_t 
         // load extended address
         if ((address >> 17) != hiaddress) {
             hiaddress = address >> 17;
-            data[0] = 0x4D;
+            data[0] = ISP_CMD_LOAD_EXTENDED_ADDRESS_BYTE;
             data[1] = 0;
             data[2] = hiaddress;
             data[3] = 0;
@@ -145,7 +145,7 @@ void isp_flash(uint32_t mempointer, uint32_t address, uint32_t length, uint16_t 
         }
 
         // load byte
-        data[0] = 0x40 | ((address & 1) << 3);
+        data[0] = ISP_CMD_LOAD_PROGRAM_MEMORY_PAGE_LOW_BYTE | ((address & 1) << 3);
         data[1] = address >> 9;
         data[2] = address >> 1;
         data[3] = flash_readbyte(mempointer++);
@@ -155,13 +155,13 @@ void isp_flash(uint32_t mempointer, uint32_t address, uint32_t length, uint16_t 
         if ((((address + 1) % pagesize) == 0) || ((length == 1) && (doflush))) {
             // flush page
 
-            data[0] = 0x4C;
+            data[0] = ISP_CMD_WRITE_PROGRAM_MEMORY_PAGE;
             data[1] = address >> 9;
             data[2] = address >> 1;
             data[3] = 0;
             isp_transmit(data, sizeof (data));
 
-            clock_delayFast(CLOCK_TICKER_FAST_5MS);
+            clock_delayFast(ISP_DELAY_FLASH);
 
             doflush = 0;
         }
@@ -180,7 +180,7 @@ void isp_flash(uint32_t mempointer, uint32_t address, uint32_t length, uint16_t 
  * @retval 0 Verification error
  * @retval 1 Verification successful
  */
-uint8_t isp_verify(uint32_t mempointer, uint32_t address, uint32_t length) {
+uint8_t isp_verifyFlash(uint32_t mempointer, uint32_t address, uint32_t length) {
     uint8_t data[4];
     uint8_t hiaddress = 0xff;
     while (length > 0) {
@@ -188,7 +188,7 @@ uint8_t isp_verify(uint32_t mempointer, uint32_t address, uint32_t length) {
         // load extended address
         if ((address >> 17) != hiaddress) {
             hiaddress = address >> 17;
-            data[0] = 0x4D;
+            data[0] = ISP_CMD_LOAD_EXTENDED_ADDRESS_BYTE;
             data[1] = 0;
             data[2] = hiaddress;
             data[3] = 0;
@@ -196,9 +196,90 @@ uint8_t isp_verify(uint32_t mempointer, uint32_t address, uint32_t length) {
         }
 
         // read byte
-        data[0] = 0x20 | ((address & 1) << 3);
+        data[0] = ISP_CMD_READ_PROGRAM_MEMORY_PAGE_LOW_BYTE | ((address & 1) << 3);
         data[1] = address >> 9;
         data[2] = address >> 1;
+        data[3] = 0;
+        isp_transmit(data, sizeof (data));
+
+        if (flash_readbyte(mempointer++) != data[3]) return 0;
+
+        address++;
+        length--;
+
+    }
+    return 1;
+}
+
+/**
+ * @brief Transfer given memory block to ISP target eeprom
+ * @param mempointer Pointer to start of data to transfer
+ * @param address Target address
+ * @param length Length of data block
+ * @param pagesize Size of target flash page
+ */
+void isp_writeEEPROM(uint32_t mempointer, uint32_t address, uint32_t length, uint16_t pagesize) {
+
+    uint8_t doflush = 0;
+    uint8_t data[4];
+    while (length > 0) {
+
+        // load byte
+        data[1] = address >> 8;
+        data[2] = address & 0xff;
+        data[3] = flash_readbyte(mempointer++);
+
+        if (pagesize <= 1) {
+            
+            // single byte programming
+            data[0] = ISP_CMD_WRITE_EEPROM_MEMORY;
+            isp_transmit(data, sizeof (data));
+            clock_delayFast(ISP_DELAY_EEPROM);
+            
+        } else {
+            
+            // page programming
+            data[0] = ISP_CMD_LOAD_EEPROM_MEMORY_PAGE;
+            isp_transmit(data, sizeof (data));
+            doflush = 1;
+
+            if ((((address + 1) % pagesize) == 0) || ((length == 1) && (doflush))) {
+                // flush page
+
+                data[0] = ISP_CMD_WRITE_EEPROM_MEMORY_PAGE;
+                data[1] = address >> 8;
+                data[2] = address & 0xfc;
+                data[3] = 0;
+                isp_transmit(data, sizeof (data));
+
+                clock_delayFast(ISP_DELAY_EEPROM);
+
+                doflush = 0;
+            }
+        }
+
+        address++;
+        length--;
+
+    }
+}
+
+/**
+ * @brief Read data from target and verify its content with given eeprom block
+ * @param mempointer Pointer to data block to verify with
+ * @param address Address of target
+ * @param length Length of data block to verify
+ * @retval 0 Verification error
+ * @retval 1 Verification successful
+ */
+uint8_t isp_verifyEEPROM(uint32_t mempointer, uint32_t address, uint32_t length) {
+    uint8_t data[4];
+    while (length > 0) {
+
+        // read byte
+        data[0] = ISP_CMD_READ_EEPROM_MEMORY;
+        data[1] = address >> 8;
+        data[2] = address & 0xff;
         data[3] = 0;
         isp_transmit(data, sizeof (data));
 
