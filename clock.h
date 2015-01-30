@@ -4,7 +4,7 @@
  * @brief This file contains definitons for clock and timing functions
  *
  * @author Thomas Fischl
- * @copyright (c) 2013 Thomas Fischl
+ * @copyright (c) 2013-2014 Thomas Fischl
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -4,7 +4,7 @@
  * @brief This file contains definitions for script processing functions
  *
  * @author Thomas Fischl
- * @copyright (c) 2013 Thomas Fischl
+ * @copyright (c) 2013-2014 Thomas Fischl
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #define SCRIPT_CMD_FLASH        0x05    ///< Command: Flash data block
 #define SCRIPT_CMD_WAIT         0x06    ///< Command: Wait x*10ms
 #define SCRIPT_CMD_DECCOUNTER   0x07    ///< Command: Decrement programming counter
+#define SCRIPT_CMD_EEPROM       0x08    ///< Command: Write eeprom data block
 #define SCRIPT_CMD_END          0xff    ///< Command: End of script
 
 uint8_t script_run();
