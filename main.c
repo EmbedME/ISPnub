@@ -22,6 +22,12 @@
  *   - Code cleanup and documentation
  * - v1.2 (2014-04-08)
  *   - Added EEPROM programming
+ * - v1.3 (2017-01-29)
+ *   - Improvements for Battery-Powered Devices (TODO)
+ *   - State-Machine in Main (TODO)
+ *   - Buzzer on PBxxx (TODO)
+ *   - made slowticker volatile
+ *   - 
  *
  */
 
@@ -69,6 +75,12 @@ int main(void) {
 
     hal_init();
     clock_init();
+	
+	
+	hal_setLEDgreen(1);
+	hal_setLEDred(0);
+	hal_setBuzzer(0);
+	
 
     // enable interrupts
     sei();
@@ -80,8 +92,6 @@ int main(void) {
     uint8_t keyticker = clock_getTickerSlow();
     uint8_t keylocked = 1;
 
-    hal_setLEDgreen(1);
-    hal_setLEDred(0);
 
     // main loop	
     while (1) {
