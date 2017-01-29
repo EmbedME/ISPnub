@@ -30,7 +30,7 @@
 /**
  * @brief This variable ticks slow generated with timer interrupt
  */
-uint8_t slowticker;
+volatile uint8_t slowticker;
 
 
 /**
