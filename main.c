@@ -60,6 +60,7 @@
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <avr/sleep.h> 
 #include "clock.h"
 #include "isp.h"
 #include "counter.h"
@@ -74,7 +75,10 @@
 int main(void) {
 
     hal_init();
+	hal_enableINT0();
+	hal_enableINT1();
     clock_init();
+	
 	
 	
 	hal_setLEDgreen(1);
@@ -130,20 +134,53 @@ int main(void) {
 
         }
 
-        // do led signaling
+        // do signaling
         if (clock_getTickerSlowDiff(ticker) > CLOCK_TICKER_SLOW_250MS) {
             ticker = clock_getTickerSlow();
             toggle = !toggle;
 
-            if (counter == 0) hal_setLEDgreen(toggle);
-            else hal_setLEDgreen(success);
+            if (counter == 0) {
+				hal_setLEDgreen(toggle);
+            } else {
+				hal_setLEDgreen(success);
+			}
 
-            if (!success) hal_setLEDred(toggle);
-            else hal_setLEDred(0);
+            if (!success) {
+				hal_setLEDred(toggle);
+			} else {
+				hal_setLEDred(0);
+			}
 
         }
+		
+		
+		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+		cli();	//for atomic check of condition
+		if (clock_getTickerSlowDiff(keyticker) > CLOCK_TICKER_SLOW_8S) {
+			sleep_enable();
+			sleep_bod_disable();
+			hal_setLEDgreen(0);
+			hal_setLEDred(0);
+			sei();
+			sleep_cpu();
+			
+			//execution is resumed here after processing interrupt
+			
+			hal_setLEDgreen(1);
+			sleep_disable();
+		}
+		sei();
+		
     }
 
     return (0);
 }
 
+
+ISR(INT1_vect) {
+	//dummy
+}
+
+ISR(INT0_vect) {
+	//dummy
+}
