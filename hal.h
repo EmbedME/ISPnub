@@ -37,7 +37,8 @@
 #define hal_getSwitch()		( (PIND & (1 << IO_SWITCH) ) == 0)
 #define hal_setBuzzer(x)	PORTA = (PORTA & ~(1 << IO_BUZZER))		| ((!x) << IO_BUZZER)
 #define hal_init()			DDRD = (1 << IO_LED_GREEN); DDRC = (1 << IO_LED_RED); DDRA = (1 << IO_BUZZER); PORTD = ( (1<<IO_SWITCH) | (1<<IO_EXT_SWITCH) );	//LEDs & Buzzer: Output; Switch: Enable Pullup
-#define hal_enableINT1()	EICRA |= ( (0<<ISC11) | (0<<ISC10) ); EIMSK = (1<<INT1);												//Enable INT1, fire on low level (this is the only detectable state in powerdown)
+#define hal_enableINT1()	EIMSK |= (1<<INT1);												//Enable INT1, fire on low level (this is the only detectable state in powerdown)
+#define hal_disableINT1() 	EIMSK &= ~(1<<INT1);
 
 #define DEFINE_DATAPOINTER uint32_t scriptdata_p = FAR(scriptdata);
 #define flash_readbyte(x) pgm_read_byte_far(x)

@@ -23,11 +23,9 @@
  * - v1.2 (2014-04-08)
  *   - Added EEPROM programming
  * - v1.3 (2017-01-29)
- *   - Improvements for Battery-Powered Devices (TODO)
- *   - State-Machine in Main (TODO)
- *   - Buzzer on PBxxx (TODO)
+ *   - Improvements for Battery-Powered Devices
  *   - made slowticker volatile
- *   - 
+ *   - Fixed HAL for LED
  *
  */
 
@@ -93,6 +91,7 @@ int main(void) {
     uint8_t success = 1;
     uint8_t keyticker = clock_getTickerSlow();
     uint8_t keylocked = 1;
+	uint8_t sleeptimer = clock_getTickerSlow();
 
 
     // main loop	
@@ -149,6 +148,8 @@ int main(void) {
 		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 		cli();	//for atomic check of condition
 		if (clock_getTickerSlowDiff(keyticker) > CLOCK_TICKER_SLOW_8S) {
+			sleeptimer=clock_getTickerSlow();		//update timer to prevent immediate sleepmode after wakeup
+			hal_enableINT1();
 			sleep_enable();
 			sleep_bod_disable();
 			hal_setLEDgreen(0);
@@ -170,5 +171,5 @@ int main(void) {
 
 
 ISR(INT1_vect) {
-	//dummy
+	hal_disableINT1();
 }
