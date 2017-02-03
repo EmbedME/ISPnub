@@ -75,11 +75,11 @@ int main(void) {
     hal_init();
 	hal_enableINT1();
     clock_init();
+	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	
 	
 	hal_setLEDgreen(1);
 	hal_setLEDred(0);
-	hal_setBuzzer(0);
 	
 
     // enable interrupts
@@ -91,8 +91,7 @@ int main(void) {
     uint8_t success = 1;
     uint8_t keyticker = clock_getTickerSlow();
     uint8_t keylocked = 1;
-	uint8_t sleeptimer = clock_getTickerSlow();
-
+	
 
     // main loop	
     while (1) {
@@ -145,10 +144,9 @@ int main(void) {
         }
 		
 		
-		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+		
 		cli();	//for atomic check of condition
 		if (clock_getTickerSlowDiff(keyticker) > CLOCK_TICKER_SLOW_8S) {
-			sleeptimer=clock_getTickerSlow();		//update timer to prevent immediate sleepmode after wakeup
 			hal_enableINT1();
 			sleep_enable();
 			sleep_bod_disable();
