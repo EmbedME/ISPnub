@@ -30,15 +30,13 @@
 #define IO_LED_GREEN	PD4		// at Port D
 #define IO_LED_RED		PC3		// at Port C
 #define IO_SWITCH		PD3		// at Port D (INT1)
-#define IO_EXT_SWITCH	PD2		// at Port D (INT0)
 #define IO_BUZZER		PA0		// at Port A
 
 #define hal_setLEDgreen(x)	PORTD =	(PORTD & ~(1 << IO_LED_GREEN))	| ((!x) << IO_LED_GREEN)										// inverses logic: setLEDx(1) turns it on
 #define hal_setLEDred(x)	PORTC =	(PORTC & ~(1 << IO_LED_RED))	| ((!x) << IO_LED_RED)
-#define hal_getSwitch()		( (PIND & ( (1 << IO_SWITCH ) | (1 << IO_EXT_SWITCH) ) ) == 0)											// connection closes to GND; if 0 switch is hit
+#define hal_getSwitch()		( (PIND & (1 << IO_SWITCH) ) == 0)
 #define hal_setBuzzer(x)	PORTA = (PORTA & ~(1 << IO_BUZZER))		| ((!x) << IO_BUZZER)
 #define hal_init()			DDRD = (1 << IO_LED_GREEN); DDRC = (1 << IO_LED_RED); DDRA = (1 << IO_BUZZER); PORTD = ( (1<<IO_SWITCH) | (1<<IO_EXT_SWITCH) );	//LEDs & Buzzer: Output; Switch: Enable Pullup
-#define hal_enableINT0()	EICRA |= ( (0<<ISC01) | (0<<ISC00) ); EIMSK = (1<<INT0);												//Enable INT0, fire on low level (this is the only detectable state in powerdown)
 #define hal_enableINT1()	EICRA |= ( (0<<ISC11) | (0<<ISC10) ); EIMSK = (1<<INT1);												//Enable INT1, fire on low level (this is the only detectable state in powerdown)
 
 #define DEFINE_DATAPOINTER uint32_t scriptdata_p = FAR(scriptdata);

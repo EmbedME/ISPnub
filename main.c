@@ -75,10 +75,8 @@
 int main(void) {
 
     hal_init();
-	hal_enableINT0();
 	hal_enableINT1();
     clock_init();
-	
 	
 	
 	hal_setLEDgreen(1);
@@ -134,22 +132,16 @@ int main(void) {
 
         }
 
-        // do signaling
+        // do led signaling
         if (clock_getTickerSlowDiff(ticker) > CLOCK_TICKER_SLOW_250MS) {
             ticker = clock_getTickerSlow();
             toggle = !toggle;
 
-            if (counter == 0) {
-				hal_setLEDgreen(toggle);
-            } else {
-				hal_setLEDgreen(success);
-			}
+            if (counter == 0) hal_setLEDgreen(toggle);
+            else hal_setLEDgreen(success);
 
-            if (!success) {
-				hal_setLEDred(toggle);
-			} else {
-				hal_setLEDred(0);
-			}
+            if (!success) hal_setLEDred(toggle);
+            else hal_setLEDred(0);
 
         }
 		
@@ -178,9 +170,5 @@ int main(void) {
 
 
 ISR(INT1_vect) {
-	//dummy
-}
-
-ISR(INT0_vect) {
 	//dummy
 }
