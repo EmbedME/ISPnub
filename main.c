@@ -22,6 +22,10 @@
  *   - Code cleanup and documentation
  * - v1.2 (2014-04-08)
  *   - Added EEPROM programming
+ * - v1.3 (2017-01-29)
+ *   - Sleep-Mode for Battery-Powered Devices
+ *   - Made slowticker volatile
+ *   - Fixed HAL for LED (PORTC/PORTD)
  *
  */
 
@@ -31,8 +35,8 @@
  * @brief This file contains the main routine with application entry point for
  *        the ISPnub firmware project
  *
- * @author Thomas Fischl
- * @copyright (c) 2013-2014 Thomas Fischl
+ * @author Thomas Fischl, Michael Gröne
+ * @copyright (c) 2013-2014,2017 Thomas Fischl, Michael Gröne
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +58,7 @@
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <avr/sleep.h> 
 #include "clock.h"
 #include "isp.h"
 #include "counter.h"
@@ -68,7 +73,14 @@
 int main(void) {
 
     hal_init();
+	hal_enableINT1();
     clock_init();
+	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	
+	
+	hal_setLEDgreen(1);
+	hal_setLEDred(0);
+	
 
     // enable interrupts
     sei();
@@ -79,9 +91,7 @@ int main(void) {
     uint8_t success = 1;
     uint8_t keyticker = clock_getTickerSlow();
     uint8_t keylocked = 1;
-
-    hal_setLEDgreen(1);
-    hal_setLEDred(0);
+	
 
     // main loop	
     while (1) {
@@ -132,8 +142,32 @@ int main(void) {
             else hal_setLEDred(0);
 
         }
+		
+		
+		
+		cli();	//for atomic check of condition
+		if (clock_getTickerSlowDiff(keyticker) > CLOCK_TICKER_SLOW_8S) {
+			hal_enableINT1();
+			sleep_enable();
+			sleep_bod_disable();
+			hal_setLEDgreen(0);
+			hal_setLEDred(0);
+			sei();
+			sleep_cpu();
+			
+			//execution is resumed here after processing interrupt
+			
+			hal_setLEDgreen(1);
+			sleep_disable();
+		}
+		sei();
+		
     }
 
     return (0);
 }
 
+
+ISR(INT1_vect) {
+	hal_disableINT1();
+}

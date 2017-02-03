@@ -25,9 +25,9 @@
 #define _SCRIPT_
 
 /**
- * @brief Sections defintion of script data
+ * @brief Sections definition of script data
  */
-#define SCRIPT_SECTION   __attribute__((section(".script_section")))
+#define SCRIPT_SECTION   __attribute__((section(".script_section")))		// section must be propagated to linker http://www.atmel.com/webdoc/AVRLibcReferenceManual/FAQ_1faq_reloc_code.html, see project properties linker -> memory settings
 
 #define SCRIPT_CMD_CONNECT      0x01    ///< Command: Connect
 #define SCRIPT_CMD_DISCONNECT   0x02    ///< Command: Disconnect

@@ -24,36 +24,21 @@
 #ifndef _HAL_
 #define _HAL_
 
-// ******************************** ATmega8 *************************************
-#if defined (__AVR_ATmega8__)
+// ******************************** ATmega1284P ***********************************
+#if defined (__AVR_ATmega1284P__)
 
-#define DEFINE_DATAPOINTER uint16_t scriptdata_p = (uint16_t)scriptdata
+#define IO_LED_GREEN	PD4		// at Port D
+#define IO_LED_RED		PC3		// at Port C
+#define IO_SWITCH		PD3		// at Port D (INT1)
 
-#define hal_init() DDRC = 0x03; PORTC = 0xfe; // all inputs except PC0 and PC1
-#define hal_getSwitch() ((PINC & (1 << PC2)) == 0)
-#define hal_setLEDgreen(x) PORTC = (PORTC & ~(1 << PC0)) | ((!x) << PC0)
-#define hal_setLEDred(x) PORTC = (PORTC & ~(1 << PC1)) | ((!x) << PC1)
-
-#define flash_readbyte(x) pgm_read_byte(x)
-
-#define	ISP_OUT   PORTB
-#define ISP_IN    PINB
-#define ISP_DDR   DDRB
-#define ISP_RST   PB2
-#define ISP_MOSI  PB3
-#define ISP_MISO  PB4
-#define ISP_SCK   PB5
-
-// ******************************** ATmega128P ***********************************
-#elif defined (__AVR_ATmega1284P__)
+#define hal_setLEDgreen(x)	PORTD =	(PORTD & ~(1 << IO_LED_GREEN))	| ((!x) << IO_LED_GREEN)										// inverses logic: setLEDx(1) turns it on
+#define hal_setLEDred(x)	PORTC =	(PORTC & ~(1 << IO_LED_RED))	| ((!x) << IO_LED_RED)
+#define hal_getSwitch()		( (PIND & (1 << IO_SWITCH) ) == 0)
+#define hal_init()			DDRD = (1 << IO_LED_GREEN); DDRC = (1 << IO_LED_RED); PORTD = (1<<IO_SWITCH);
+#define hal_enableINT1()	EIMSK |= (1<<INT1);												//Enable INT1, fire on low level (this is the only detectable state in powerdown)
+#define hal_disableINT1() 	EIMSK &= ~(1<<INT1);
 
 #define DEFINE_DATAPOINTER uint32_t scriptdata_p = FAR(scriptdata);
-
-#define hal_init() DDRC = (1 << PC3); DDRD = (1 << PD4); PORTD = ~(1 << PD4); // all inputs except PC3 and PD4
-#define hal_getSwitch() ((PIND & (1 << PD3)) == 0)
-#define hal_setLEDred(x) PORTC = (PORTC & ~(1 << PC3)) | ((!x) << PC3)
-#define hal_setLEDgreen(x) PORTD = (PORTC & ~(1 << PD4)) | ((!x) << PD4)
-
 #define flash_readbyte(x) pgm_read_byte_far(x)
 
 #define	ISP_OUT   PORTB

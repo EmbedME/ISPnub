@@ -25,6 +25,7 @@
 #define CLOCK_H
 
 // 8 MHz / 1024 / 256 = 30.52 Hz
+#define CLOCK_TICKER_SLOW_8S 244	///< 8s slow ticks
 #define CLOCK_TICKER_SLOW_1S 31     ///< 1s slow ticks
 #define CLOCK_TICKER_SLOW_500MS 15  ///< 500ms slow ticks
 #define CLOCK_TICKER_SLOW_250MS 8   ///< 250ms slow ticks
