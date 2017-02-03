@@ -23,9 +23,9 @@
  * - v1.2 (2014-04-08)
  *   - Added EEPROM programming
  * - v1.3 (2017-01-29)
- *   - Improvements for Battery-Powered Devices
- *   - made slowticker volatile
- *   - Fixed HAL for LED
+ *   - Sleep-Mode for Battery-Powered Devices
+ *   - Made slowticker volatile
+ *   - Fixed HAL for LED (PORTC/PORTD)
  *
  */
 
@@ -35,8 +35,8 @@
  * @brief This file contains the main routine with application entry point for
  *        the ISPnub firmware project
  *
- * @author Thomas Fischl
- * @copyright (c) 2013-2014 Thomas Fischl
+ * @author Thomas Fischl, Michael Gröne
+ * @copyright (c) 2013-2014,2017 Thomas Fischl, Michael Gröne
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
