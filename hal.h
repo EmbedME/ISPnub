@@ -4,7 +4,7 @@
  * @brief This file contains definitions for hardware abstraction
  *
  * @author Thomas Fischl
- * @copyright (c) 2013 Thomas Fischl
+ * @copyright (c) 2013-2020 Thomas Fischl
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@
 #define hal_init() DDRC = (1 << PC3); DDRD = (1 << PD4); PORTD = ~(1 << PD4); // all inputs except PC3 and PD4
 #define hal_getSwitch() ((PIND & (1 << PD3)) == 0)
 #define hal_setLEDred(x) PORTC = (PORTC & ~(1 << PC3)) | ((!x) << PC3)
-#define hal_setLEDgreen(x) PORTD = (PORTC & ~(1 << PD4)) | ((!x) << PD4)
+#define hal_setLEDgreen(x) PORTD = (PORTD & ~(1 << PD4)) | ((!x) << PD4)
 
 #define flash_readbyte(x) pgm_read_byte_far(x)
 
